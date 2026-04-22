@@ -27,68 +27,64 @@ package space.vectrix.ignite.game;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.jar.JarFile;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import space.vectrix.ignite.Blackboard;
 import space.vectrix.ignite.IgniteBootstrap;
+import space.vectrix.ignite.agent.IgniteAgent;
+import space.vectrix.ignite.util.BlackboardMap;
 
 /**
- * Provides a game locator for Hytale.
+ * Provides a game locator for PowernukkitX.
  *
- * @author vectrix
- * @since 1.2.0
+ * @author Kanelucky
+ * @since 1.2.1
  */
-public final class HytaleGameLocator implements GameLocatorService {
-  private HytaleGameProvider provider;
+public class PowernukkitXGameLocator implements GameLocatorService {
+  private static final BlackboardMap.@NotNull Key<Path> POWERNUKKITX_JAR = Blackboard.key("ignite.powernukkitx.jar",Path.class, Paths.get("./powernukkitx.jar"));
+  public static final BlackboardMap.@NotNull Key<String> GAME_TARGET = Blackboard.key("ignite.target", String.class, "cn.nukkit.Nukkit");
+
+  private PowernukkitXGameProvider provider;
 
   @Override
   public @NotNull String id() {
-    return "hytale";
+    return "powernukkitx";
   }
 
   @Override
   public @NotNull String name() {
-    return "Hytale";
+    return "PowernukkitX";
   }
 
   @Override
   public int priority() {
-    return 50;
+    return 1;
   }
 
   @Override
   public boolean shouldApply() {
-    final Path path = Blackboard.get(Blackboard.GAME_JAR).orElseGet(() -> Paths.get("./HytaleServer.jar"));
-    try(final JarFile jarFile = new JarFile(path.toFile())) {
-      return jarFile.getJarEntry("manifests.json") != null;
-    } catch(final IOException exception) {
-      return false;
-    }
+    return true;
   }
 
   @Override
   public void apply(final @NotNull IgniteBootstrap bootstrap) throws Throwable {
-    Blackboard.compute(Blackboard.GAME_TARGET, () -> Blackboard.get(Blackboard.GAME_TARGET).orElse("com.hypixel.hytale.Main"));
+    Blackboard.compute(PowernukkitXGameLocator.POWERNUKKITX_JAR, () -> Paths.get(System.getProperty(PowernukkitXGameLocator.POWERNUKKITX_JAR.name())));
 
-    // Create the game provider.
-    if(this.provider == null) {
-      this.provider = new HytaleGameProvider();
-    }
+    this.provider = new PowernukkitXGameProvider();
 
-    // Locate the game jar.
-    if(!Blackboard.get(Blackboard.GAME_JAR).isPresent()) {
-      Blackboard.put(Blackboard.GAME_JAR, this.provider.gamePath());
+    try {
+      IgniteAgent.addJar(Blackboard.raw(PowernukkitXGameLocator.POWERNUKKITX_JAR));
+    } catch(final IOException exception) {
+      throw new IllegalStateException("Unable to add powernukkitx jar to classpath!", exception);
     }
   }
 
-  @Override
-  public @NotNull GameProvider locate() {
+  @Override public @NotNull GameProvider locate() {
     return this.provider;
   }
 
-  /* package */ static final class HytaleGameProvider implements GameProvider {
-    /* package */ HytaleGameProvider() {
+  static final class PowernukkitXGameProvider implements GameProvider {
+    /* package */ PowernukkitXGameProvider() {
     }
 
     @Override
@@ -98,7 +94,7 @@ public final class HytaleGameLocator implements GameLocatorService {
 
     @Override
     public @NotNull Path gamePath() {
-      return Blackboard.get(Blackboard.GAME_JAR).orElseGet(() -> Paths.get("./HytaleServer.jar"));
+      return Blackboard.get(Blackboard.GAME_JAR).orElseGet(() -> Paths.get("./powernukkitx.jar"));
     }
   }
 }
