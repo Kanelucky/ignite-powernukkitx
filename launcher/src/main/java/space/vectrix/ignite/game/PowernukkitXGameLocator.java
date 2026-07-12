@@ -42,7 +42,7 @@ import space.vectrix.ignite.util.BlackboardMap;
  */
 public class PowernukkitXGameLocator implements GameLocatorService {
   private static final BlackboardMap.@NotNull Key<Path> POWERNUKKITX_JAR = Blackboard.key("ignite.powernukkitx.jar",Path.class, Paths.get("./powernukkitx.jar"));
-  public static final BlackboardMap.@NotNull Key<String> GAME_TARGET = Blackboard.key("ignite.target", String.class, "cn.nukkit.Nukkit");
+  public static final BlackboardMap.@NotNull Key<String> GAME_TARGET = Blackboard.key("ignite.target", String.class, "org.powernukkitx.PowerNukkitX");
 
   private PowernukkitXGameProvider provider;
 
